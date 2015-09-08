@@ -19,7 +19,6 @@ limitations under the License.
 
 <link rel="import" href="media-item.html">
 <link rel="import" href="queue-manager.html">
-
 <script>
   var cast = window.cast || {};
   (function () {
@@ -258,32 +257,12 @@ limitations under the License.
         this.setCastMedia(media);
 
         media.addUpdateListener(this._onCastMediaUpdate.bind(this));
-
-        var tmpCurrentTime = this.currentTime;
-        var tmpPlayerState = this.localMedia.state;
-        var tmpMediaUrl = this.localMedia.url;
-
         //TODO(pying): make sure this works for a single video
 
         //Copy over remote queue to local queue if it's not empty
         if (media.items !== null) {
           this._queueSwitchFromLocalToCast(media.items);
         }
-
-        this.setLocalMedia(this.queue.getItemById(media.currentItemId));
-
-        // If the chromecast media doesn't match our previously loaded local media or
-        // if media is already playing or if the Chromecast media isn't at the beginning,
-        // we assume that we need to sync the local state with the chrome cast state and
-        // update the local current time and state to match the casting media state
-        if (tmpMediaUrl !== media.media.contentId ||
-            media.playerState === chrome.cast.media.PlayerState.PLAYING ||
-            media.currentTime !== 0) {
-
-          this.set('currentTime', media.currentTime);
-          this.localMedia.setState(this._castPlayerStateToLocalPlayerState(media.playerState));
-        }
-
         this._onCastMediaUpdate();
       },
 
@@ -298,10 +277,9 @@ limitations under the License.
           //Parse the queue and update our local representation
           this.queue.parseCastQueue(this.castMedia.items);
 
-          //TODO(pying): handle when queue is deleted
-          //Sync localMedia if it's different
-          if (this.castMedia.currentItemId &&
-              this.localMedia.queueId !== this.castMedia.currentItemId) {
+          //Sync localMedia if it's different or if localMedia doesn't exist or have a queueId
+          if (!this.localMedia || !this.localMedia.queueId || (this.castMedia.currentItemId &&
+              this.localMedia.queueId !== this.castMedia.currentItemId)) {
             this.setLocalMedia(this.queue.getItemById(this.castMedia.currentItemId));
           }
 
