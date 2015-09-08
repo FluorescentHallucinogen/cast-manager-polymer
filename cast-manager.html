@@ -211,7 +211,7 @@ limitations under the License.
           } else if (this.queue.items.length > 0) {
             this._loadSavedQueueOnDisconnect = false;
             this.castLoadItems(this.queue.items);
-          } else if (this.localMedia !== null) {
+          } else if (this.localMedia) {
             this.loadMediaOntoCast(this.localMedia, true);
           }
         } else {
@@ -789,7 +789,8 @@ limitations under the License.
             itemsToAdd[i] = new chrome.cast.media.QueueItem(
                 this._localMediaToCastMedia(items[i]));
             itemsToAdd[i].preloadTime = 20;
-            if (items[i].queueId === this.localMedia.queueId && this.currentTime !== 0) {
+            if (this.localMedia.queueId && items[i].queueId === this.localMedia.queueId &&
+            this.currentTime !== 0) {
               itemsToAdd[i].startTime = this.currentTime;
             }
           }
