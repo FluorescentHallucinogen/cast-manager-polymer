@@ -190,13 +190,15 @@ limitations under the License.
       },
       /******* Event Listeners ************/
 
-      /**
+     /**
        * Listener invoked when a session is created or connected.
        */
       _sessionListener: function (session) {
         console.log('SessionListener: Session changed');
         if (session.status === chrome.cast.SessionStatus.CONNECTED) {
           console.log('SessionListener: Session connected');
+          session.addUpdateListener(this._sessionUpdateListener.bind(this));
+
           this.set('connectionStatus', cast.CastManager.CONNECTION_STATUS.CONNECTED);
 
           //Store a local reference to the session and set our receiver name
@@ -213,15 +215,14 @@ limitations under the License.
           } else if (this.localMedia) {
             this.loadMediaOntoCast(this.localMedia, true);
           }
-        } else {
-          console.log('SessionListener: Session disconnected');
-          this.set('connectionStatus', cast.CastManager.CONNECTION_STATUS.DISCONNECTED);
-          //Todo(pying): check if this is the proper place to revert our old queue
-          //or if it's in onStopSuccess
-          //this.set('queue', this._savedQueue);
         }
-        //Todo(pying): check if we need to check session updates
-        //TODO(pying): check if we need sender in events
+      },
+
+      _sessionUpdateListener: function() {
+        if (this.session.status !== chrome.cast.SessionStatus.CONNECTED) {
+          console.log('SessionListener: Session disconnected');
+          this._onStopSuccess();
+        }
       },
 
       /**
@@ -793,7 +794,7 @@ limitations under the License.
           queueItem.autoplay = autoplay;
           queueItem.preloadTime = this._preloadTime;
 
-          request = new chrome.cast.media.QueueInsertAndPlayRequest(queueItem);
+          request = new chrome.cast.media.QueueInsertAndPlayItemRequest(queueItem);
           request.insertBefore = insertBefore;
 
           this.castMedia.queueInsertAndPlayItem(request, this._onGenericSuccess.bind(this),
