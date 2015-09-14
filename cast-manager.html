@@ -525,12 +525,13 @@ limitations under the License.
           var successHandler = function (data) {
             this.castQueuePlayItem(this.castMedia.items[currentIndex].itemId);
           }.bind(this);
+          var index = (currentIndex !== -1) ? this.castMedia.currentItemId : null;
 
-          if (currentIndex !== -1) {
-            this.castQueueInsertItems([media], this.castMedia.currentItemId,
-                successHandler.bind(this), true);
+          if (this.castMedia.queueInsertAndPlayItem) {
+            this.castQueueInsertAndPlayItem(media, index, true);
           } else {
-            this.castQueueInsertItems([media], null, successHandler, true);
+            this.castQueueInsertItems([media], index,
+                successHandler.bind(this), true);
           }
         } else if (this.session && this.session.status === chrome.cast.SessionStatus.CONNECTED) {
           this.loadMediaOntoCast(media, true);
@@ -781,16 +782,12 @@ limitations under the License.
         }
       },
 
-      /**
-       * Converts local media items to cast items then inserts them.  If insertBefore is
-       * defined it inserts the items before the insertBefore itemId.  Otherwise it inserts the
-       * items ath the beginning.
-       */
-      castQueueInsertItems: function (media, insertBefore, successCallback, autoplay) {
+      
+      castQueueInsertAndPlayItem: function (media, insertBefore, autoplay) {
         var queueItem, request;
         if(this.castMedia.queueInsertAndPlayItem){
 
-          queueItem = new chrome.cast.media.QueueItem(this._localMediaToCastMedia(media[0]));
+          queueItem = new chrome.cast.media.QueueItem(this._localMediaToCastMedia(media));
           queueItem.autoplay = autoplay;
           queueItem.preloadTime = this._preloadTime;
 
@@ -799,27 +796,37 @@ limitations under the License.
 
           this.castMedia.queueInsertAndPlayItem(request, this._onGenericSuccess.bind(this),
               this._onGenericFailure.bind(this));
-        } else {
-          //Convert local media items to cast media items
-          var itemsToAdd = [];
-          for (var i = 0; i < media.length; i++) {
-            queueItem = new chrome.cast.media.QueueItem(this._localMediaToCastMedia(media[i]));
-            queueItem.autoplay = autoplay;
-            queueItem.preloadTime = this._preloadTime;
-            itemsToAdd.push(queueItem);
-          }
-
-          //Create the insert request
-          request = new chrome.cast.media.QueueInsertItemsRequest(itemsToAdd);
-          request.insertBefore = insertBefore;
-          if (successCallback === null) {
-            successCallback = this._onGenericSuccess.bind(this);
-          }
-
-          //Insert the media
-          this.castMedia.queueInsertItems(request, successCallback,
-              this._onGenericFailure.bind(this));
         }
+      },
+
+      /**
+       * Converts local media items to cast items then inserts them.  If insertBefore is
+       * defined it inserts the items before the insertBefore itemId.  Otherwise it inserts the
+       * items ath the beginning.
+       */
+      castQueueInsertItems: function (media, insertBefore, successCallback, autoplay) {
+        var queueItem, request;
+        
+        //Convert local media items to cast media items
+        var itemsToAdd = [];
+        for (var i = 0; i < media.length; i++) {
+          queueItem = new chrome.cast.media.QueueItem(this._localMediaToCastMedia(media[i]));
+          queueItem.autoplay = autoplay;
+          queueItem.preloadTime = this._preloadTime;
+          itemsToAdd.push(queueItem);
+        }
+
+        //Create the insert request
+        request = new chrome.cast.media.QueueInsertItemsRequest(itemsToAdd);
+        request.insertBefore = insertBefore;
+        if (successCallback === null) {
+          successCallback = this._onGenericSuccess.bind(this);
+        }
+
+        //Insert the media
+        this.castMedia.queueInsertItems(request, successCallback,
+              this._onGenericFailure.bind(this));
+        
       },
 
       castQueuePlayItem: function (itemId) {
