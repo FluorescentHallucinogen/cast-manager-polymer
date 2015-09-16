@@ -877,15 +877,18 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
-      queuePlayItemWithId: function (id) {
-        console.log('Playing queue item with id: ' + id);
-      },
-
+      /**
+       * Sends a request to cast to disconnect
+       */
       stopCasting: function () {
         this.session.stop(this._onStopSuccess.bind(this),
             this._onStopFailure.bind(this));
       },
 
+      /**
+       * Fires an iron event to request full screen.  Typically the video element handles this
+       * request and fullscreens itself.
+       */
       fullscreen: function () {
         console.log('Fullscreen');
         this._fireIronEvent({
@@ -897,6 +900,7 @@ Use the `helper-behavior` to easily add queueing and media control functionality
           }
         });
       },
+
       /**
        * Fire an event to exit full screen
        */
@@ -911,6 +915,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         });
       },
 
+      /**
+       * Add an array of `cast.MediaItem`s to the queue
+       *
+       * @param {Array} items array of `cast.MediaItem`s to add to the queue at the end
+       */
       addItemsToQueue: function (items) {
         this._fireIronEvent({
           'detail': {
@@ -935,6 +944,12 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Removes an item from the queue.  It does so by looking at the item's queueId so, the
+       * queueId must match not a reference comparison.
+       *
+       * @param {cast.MediaItem} media queue item to remove
+       */
       queueRemoveItem: function (media) {
         console.log('Removing item from queue: ', media.queueId);
         this._fireIronEvent({
@@ -953,6 +968,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Loads the next item from the queue
+       */
       queueLoadNextItem: function () {
         var mediaItem = this.queue.getNextItem();
         if (mediaItem) {
@@ -960,6 +978,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Covert Array of `cast.MediaItem` to `chrome.cast.media.MediaInfo` and load them onto cast
+       *
+       * @param {Array} items Array of `cast.MediaItem`s to load.
+       */
       castLoadItems: function (items) {
         if (items.length > 0) {
           this._showSpinner();
@@ -984,12 +1007,18 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       },
 
 
-      castQueueInsertAndPlayItem: function (media, insertBefore, autoplay) {
+      /**
+       * Inserts an item and immediately plays it when casting
+       *
+       * @param {cast.MediaItem} media media to play
+       * @param {Number} insertBefore Id of element to insert before
+       */
+      castQueueInsertAndPlayItem: function (media, insertBefore) {
         var queueItem, request;
         if (this.castMedia.queueInsertAndPlayItem) {
 
           queueItem = new chrome.cast.media.QueueItem(this._localMediaToCastMedia(media));
-          queueItem.autoplay = autoplay;
+          queueItem.autoplay = true;
           queueItem.preloadTime = this._preloadTime;
 
           request = new chrome.cast.media.QueueInsertAndPlayItemRequest(queueItem);
@@ -1003,7 +1032,12 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       /**
        * Converts local media items to cast items then inserts them.  If insertBefore is
        * defined it inserts the items before the insertBefore itemId.  Otherwise it inserts the
-       * items ath the beginning.
+       * items at the beginning.
+       *
+       * @param {cast.MediaItem} media media to play
+       * @param {Number} insertBefore Id of element to insert before
+       * @param {Function} successCallback callback on insert success
+       * @param {Boolean} autoplay boolean defining if the media should be autoplayed
        */
       castQueueInsertItems: function (media, insertBefore, successCallback, autoplay) {
         var queueItem, request;
@@ -1030,6 +1064,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
 
       },
 
+      /**
+       * Plays the item matching the specified ID.
+       *
+       * @param {Number} itemId ID of item to play
+       */
       castQueuePlayItem: function (itemId) {
         if (this.hasCastMedia) {
           this.castMedia.queueJumpToItem(itemId, this._onGenericSuccess.bind(this),
@@ -1038,7 +1077,7 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       },
 
       /**
-       * Removes items from queue
+       * Removes items from queue from an array of IDs.
        *
        * @param itemIds {array} itemIds of elements to remove
        */
@@ -1049,16 +1088,30 @@ Use the `helper-behavior` to easily add queueing and media control functionality
             , this._onGenericFailure.bind(this));
       },
 
+      /**
+       * Moves an item in the cast queue to a new index
+       *
+       * @param {Number} itemId id of item to move
+       * @param {Number} newIndex index to move item to
+       */
       castQueueMoveItem: function (itemId, newIndex) {
         this.castMedia.queueMoveItemToNewIndex(itemId, newIndex, this._onGenericSuccess.bind(this),
             this._onGenericFailure.bind(this));
       },
 
+      /**
+       * Handles local media loaded event fired by the video element
+       */
       mediaLoaded: function () {
         console.log('Media finished loading locally');
+        // Prevent the load media retry
         this.cancelAsync(this._retryHandler);
         this._retryHandler = null;
+
+        // Reset local spinners
         this._resetState();
+
+        // Fire an event to notify other elements that media has completed loading
         this._fireIronEvent({
           'detail': {
             'name': 'media-action',
@@ -1069,13 +1122,15 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         });
       },
 
+      /**
+       * Returns true if the casting media matches local media
+       *
+       * @return {Boolean} True if the casting media exists and matches local media
+       */
       isMediaMatch: function () {
         return !!(this.castMedia && this.castMedia.media.contentId === this.localMedia.url);
       },
 
-      urlMatchesLocalMedia: function (url) {
-        return url === this.localMedia.url;
-      },
       /**
        * Returns true if cast has a session media and the local media matches remote media
        */
@@ -1086,10 +1141,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       /************* Control functions ****************/
 
       /**
-       * Fire a seek iron signals event
+       * Fire a seek iron signals event and seek the video to the request time in seconds
        *
-       * @param time {number} time in seconds to seek to
-       * @param sender {CastManager.SENDER}
+       * @param {Number} time time in seconds to seek to
+       * @param {cast.CastManager.SENDER} sender requesting element
        */
       seek: function (time, sender) {
         console.log('Seek: ' + time + ' ' + sender);
@@ -1111,6 +1166,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Play
+       * @param {cast.CastManager.SENDER} sender requesting element
+       */
       play: function (sender) {
         console.log('Play: ' + JSON.stringify(sender));
         this._fireIronEvent({
@@ -1133,6 +1192,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Pause
+       * @param {cast.CastManager.SENDER} sender requesting element
+       */
       pause: function (sender) {
         console.log('Pause: ' + JSON.stringify(sender));
 
@@ -1151,6 +1214,12 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Set Volume
+       *
+       * @param {Number} volume number between 0 - 1 representing volume
+       * @param {cast.CastManager.SENDER} sender requesting element
+       */
       setVolume: function (volume, sender) {
         console.log('Setting volume: ' + volume);
 
@@ -1170,11 +1239,22 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Sets the current video duration.
+       *
+       * @param {Number} time duration of content in seconds
+       */
       setDuration: function (time) {
         console.log('Setting duration: ' + time);
         this.localMedia.setDuration(time);
       },
 
+      /**
+       * Displays the preload dialog which notifies users of the next video in queue.
+       *
+       * @param {cast.MediaItem} media next video in queue
+       * @param {Number} time time until next video starts
+       */
       showPreloadDialog: function (media, time) {
         this._fireIronEvent({
           'detail': {
@@ -1188,6 +1268,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         });
       },
 
+      /**
+       * Hide the preload dialog.  Fires an iron event to notify all subscribed elements
+       */
       hidePreloadDialog: function () {
         console.log('Hiding preload dialog');
         this._fireIronEvent({
@@ -1200,6 +1283,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         });
       },
 
+      /**
+       * Sets the autoplay trigger for the next loaded local video
+       *
+       * @param {Boolean} trigger whether the next video should autoplay
+       */
       setAutoPlayTrigger: function (trigger) {
         console.log('Setting auto play trigger to: ' + trigger);
         this._fireIronEvent({
@@ -1213,6 +1301,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         });
       },
       /************* Cast control methods *************/
+      /**
+       * Seek
+       *
+       * @param {Number} time time in seconds to seek to
+       */
       castSeek: function (time) {
         var request = new chrome.cast.media.SeekRequest();
         request.currentTime = Math.round(time);
@@ -1220,16 +1313,28 @@ Use the `helper-behavior` to easily add queueing and media control functionality
             this._onGenericSuccess.bind(this), this._onGenericFailure.bind(this));
       },
 
-      castPause: function (data) {
-        this.castMedia.pause(data, this._onGenericSuccess.bind(this),
+      /**
+       * Pause media on cast
+       */
+      castPause: function () {
+        this.castMedia.pause(new chrome.cast.media.PauseRequest(),
+            this._onGenericSuccess.bind(this),
             this._onGenericFailure.bind(this));
       },
 
-      castPlay: function (data) {
-        this.castMedia.play(data, this._onGenericSuccess.bind(this),
+      /**
+       * Play media on cast
+       */
+      castPlay: function () {
+        this.castMedia.play(new chrome.cast.media.PlayRequest(),
+            this._onGenericSuccess.bind(this),
             this._onGenericFailure.bind(this));
       },
 
+      /**
+       * Set the cast volume
+       * @param {Number} volume number 0 - 1 representing volume
+       */
       castVolume: function (volume) {
         var vol = new chrome.cast.Volume(volume, false);
         var request = new chrome.cast.media.VolumeRequest(vol);
@@ -1237,12 +1342,19 @@ Use the `helper-behavior` to easily add queueing and media control functionality
             this._onGenericFailure.bind(this));
       },
 
+      /**
+       * Set the cast repeat mode
+       * @param {Number} mode cast repeat mode
+       */
       castSetRepeat: function (mode) {
-        this.castMedia.queueSetRepeatMode(mode, this._onGenericSuccess.bind(this),
+        this.castMedia.queueSetRepeatMode(chrome.cast.media.RepeatMode, this._onGenericSuccess.bind(this),
             this._onGenericFailure.bind(this));
       },
 
       /************* Helper methods *******************/
+      /**
+       * Hide the spinner and fire an iron event to notify other elements
+       */
       _hideSpinner: function () {
         this.set('showSpinner', false);
         this._fireIronEvent({
@@ -1256,6 +1368,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         });
       },
 
+      /**
+       * Show the spinner and fire an iron event to notify other elements
+       */
       _showSpinner: function () {
         this.set('showSpinner', true);
         this._fireIronEvent({
@@ -1272,7 +1387,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       /******** Observers ********/
 
       /**
-       * Checks the remaining time to determine if the next video preview needs to show
+       * Checks the remaining time to determine if the next video preview needs to show.
+       *
+       * @param {Number} newVal current time in seconds
+       * @param {Number} oldVal preious time in seconds
        */
       _currentTimeObserver: function (newVal, oldVal) {
         if (this.localMedia && !this.hasCastMedia) {
@@ -1287,8 +1405,13 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
-      /********************* METHODS TO CONVERT BETWEEN LOCAL MEDIA AND CAST MEDIA ***************/
+      /********************* Conversion methods ***************/
 
+      /**
+       * Convert from  `chrome.cast.media.QueueItem` to `cast.MediaItem`
+       * @param {chrome.cast.media.QueueItem} media item to convert
+       * @return {cast.MediaItem} converted item
+       */
       _castMediaToLocalMedia: function (media) {
         return new cast.MediaItem({
           'title': media.media.metadata.title,
@@ -1301,6 +1424,12 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         });
       },
 
+      /**
+       * Convert from `cast.MediaItem` to `chrome.cast.media.MediaInfo`
+       *
+       * @param {cast.MediaItem} media item to convert
+       * @return {chrome.cast.media.MediaInfo} converted item
+       */
       _localMediaToCastMedia: function (media) {
         var castMedia = new chrome.cast.media.MediaInfo(media.url);
 
@@ -1316,6 +1445,12 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         return castMedia;
       },
 
+      /**
+       * Gets mimeType from extension
+       *
+       * @param {String} url file name
+       * @return {String} mimeType
+       */
       _fileExtensionToMimeType: function (url) {
         var extension = url.split('.').pop();
         var mimeType;
@@ -1339,6 +1474,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         return mimeType;
       },
 
+      /**
+       * Convert cast player state to local player state
+       * @param {chrome.cast.media.PlayerState} state cast player state
+       * @return {cast.MediaItem.STATE} local player state
+       */
       _castPlayerStateToLocalPlayerState: function (state) {
         switch (state) {
           case chrome.cast.media.PlayerState.PAUSED:
@@ -1356,18 +1496,31 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       },
 
 
+      /**
+       * Switch from local queue to cast queue and save the previous local queue
+       *
+       * @param {Array} queueItems array of new `chrome.cast.media.QueueItems` to insert into the
+       * queue
+       */
       _queueSwitchFromLocalToCast: function (queueItems) {
         this._savedQueue = this.queue;
         this.set('queue', new cast.QueueManager());
         this.queue.parseCastQueue(queueItems);
       },
 
+      /**
+       * Hide the spinner and reset the next video preview
+       */
       _resetState: function () {
         this._hideSpinner();
         this.set('countdownToNextMediaItem', null);
         this.set('nextQueueMediaItem', null);
       },
 
+      /**
+       * Shortcut to fire an iron event
+       * @param {Object} event event details
+       */
       _fireIronEvent: function (event) {
         var ironEvent = new CustomEvent('iron-signal', event);
         document.dispatchEvent(ironEvent);
@@ -1376,12 +1529,12 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       /**
        * Converts local queue repeat mode and shuffle mode to {chrome.cast.media.RepeatMode}
        *
-       * @param queue
-       * @returns {*}
+       * @param {cast.QueueManager} queue local queue
+       * @returns {chrome.cast.media.RepeatMode} cast repeat mode
        */
       _localQueueToCastQueueRepeatMode: function (queue) {
         if (queue.shuffle) {
-//          return chrome.cast.media.RepeatMode.ALL_AND_SHUFFLE;
+//          return chrome.cast.media.RepeatMode.ALL_AND_SHUFFLE;  // bug in extension
           return 'REPEAT_ALL_AND_SHUFFLE';
         } else {
           switch (queue.repeatMode) {
@@ -1398,6 +1551,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Converts cast repeat mode to local repeat mode
+       * @param {chrome.cast.media.RepeatMode} mode cast repeat mode
+       * @return {cast.QueueManager.REPEAT_MODE} local repeat mode
+       */
       _castQueueRepeatModeToLocalRepeatMode: function (mode) {
         switch (mode) {
           case chrome.cast.media.RepeatMode.OFF:
@@ -1414,6 +1572,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         }
       },
 
+      /**
+       * Converts cast repeat mode to local shuffle mode
+       * @param {chrome.cast.media.RepeatMode} mode  cast repeat mode
+       * @return {Boolean} boolean describing if shuffle is on.
+       */
       _castQueueRepeatModeToLocalShuffle: function (mode) {
         return mode === chrome.cast.media.RepeatMode.ALL_AND_SHUFFLE;
       }
