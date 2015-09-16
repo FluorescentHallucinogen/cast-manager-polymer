@@ -19,6 +19,37 @@ limitations under the License.
 
 <link rel="import" href="media-item.html">
 <link rel="import" href="queue-manager.html">
+
+<!--
+The `cast-manager` element is the controller for all of the cast elements.  It routes events,
+manages and syncs states and handles all of the casting/local logic for controlling media.  It exposes
+state for other elements to then bind to.
+
+Example:
+    <cast-manager app-id="4F8B3483"
+                cast-available="{{castAvailable}}"
+                connection-status="{{connectionStatus}}"
+                local-media="{{localMedia}}"
+                queue="{{queue}}"
+                volume="{{volume}}"
+                has-cast-media="{{hasCastMedia}}"
+                show-queue="{{showQueue}}"
+                cast-device-name="{{castDeviceName}}"
+                current-time="{{currentTime}}"
+                is-fullscreen="{{isFullscreen}}"
+                show-spinner="{{showSpinner}}"
+                next-queue-media-item="{{nextQueueMediaItem}}"
+                countdown-to-next-media-item="{{countdownToNextMediaItem}}">
+    </cast-manager>
+
+`cast-manager` stores both state and fires events.  Events are meant to initiate actions.  For
+example if a user presses play on the player bar, that element bubbles up the event to `cast-manager`.  `cast-manager` then
+fires a iron event notifying any listening elements to take action.  Once the action has occured,
+ the element then updates state which is 2 way bound to update the property in `cast-manager`.
+
+Use the `helper-behavior` to easily add queueing and media control functionality into your app.
+-->
+
 <script>
   var cast = window.cast || {};
   (function () {
@@ -33,7 +64,7 @@ limitations under the License.
         appId: String,
 
         /**
-         * Media information to display
+         * Media object to display in format `cast.MediaItem`
          */
         localMedia: {
           type: Object,
@@ -41,7 +72,7 @@ limitations under the License.
         },
 
         /**
-         * Reference to loaded cast Media
+         * Reference to loaded `chrome.cast.media`
          */
         castMedia: {
           type: Object,
@@ -49,7 +80,7 @@ limitations under the License.
         },
 
         /**
-         * Queue representation
+         * `cast.QueueManager` instance to store the current state of the queue
          */
         queue: {
           type: Object,
@@ -60,7 +91,7 @@ limitations under the License.
         },
 
         /**
-         * Loading status
+         * Spinner state
          */
         showSpinner: {
           type: Boolean,
@@ -68,6 +99,11 @@ limitations under the License.
           value: false
         },
 
+        /**
+         * Cast connection state.
+         *
+         * Values defined by cast.CastManager.CONNECTION_STATUS
+         */
         connectionStatus: {
           type: Number,
           notify: true,
@@ -75,7 +111,7 @@ limitations under the License.
         },
 
         /**
-         * Chrome cast session reference
+         * Reference to loaded `chrome.cast.Session`
          */
         session: {
           type: Object,
@@ -91,12 +127,18 @@ limitations under the License.
           value: false
         },
 
+        /**
+         * Current media volume syncs to both local and cast media.
+         */
         volume: {
           type: Number,
           value: .5,
           notify: true
         },
 
+        /**
+         * `currentTime` of media syncs to both local and cast media
+         */
         currentTime: {
           type: Number,
           value: 0,
@@ -104,13 +146,19 @@ limitations under the License.
           observer: ['_currentTimeObserver']
         },
 
+        /**
+         * Name of the connected cast device
+         */
         castDeviceName: {
           type: String,
           value: 'Local Player',
           notify: true
         },
 
-        showQueue: {
+        /**
+         * State defining if the queue is shown or hidden
+         */
+        isQueueShown: {
           type: Boolean,
           value: false,
           notify: true
@@ -191,7 +239,7 @@ limitations under the License.
       },
       /******* Event Listeners ************/
 
-     /**
+      /**
        * Listener invoked when a session is created or connected.
        */
       _sessionListener: function (session) {
@@ -219,7 +267,7 @@ limitations under the License.
         }
       },
 
-      _sessionUpdateListener: function() {
+      _sessionUpdateListener: function () {
         if (this.session.status !== chrome.cast.SessionStatus.CONNECTED) {
           console.log('SessionListener: Session disconnected');
           this._onStopSuccess();
@@ -446,7 +494,7 @@ limitations under the License.
           }
         });
 
-        this._retryHandler = this.async(function() {
+        this._retryHandler = this.async(function () {
           console.log('retrying setting the local media');
           this.setLocalMedia(media);
         }, 2000);
@@ -467,7 +515,7 @@ limitations under the License.
       },
 
       /**
-       * Sets the content currentTime and updates the time remaining string
+       * Checks the remaining time to determine if the next video preview needs to show
        */
       _currentTimeObserver: function (newVal, oldVal) {
         if (this.localMedia && !this.hasCastMedia) {
@@ -496,13 +544,12 @@ limitations under the License.
       toggleQueueElement: function () {
         console.log('Toggle queue element');
 
-        this.set('showQueue', !this.showQueue);
         this._fireIronEvent({
           'detail': {
             'name': 'media-action',
             'data': {
               'action': 'toggleQueueElement',
-              'showQueue': this.showQueue
+              "isQueueShown": this.isQueueShown
             }
           }
         });
@@ -766,7 +813,7 @@ limitations under the License.
       },
 
       castLoadItems: function (items) {
-        if(items.length > 0) {
+        if (items.length > 0) {
           this._showSpinner();
 
           //Convert local queue items to cast queue Items
@@ -776,7 +823,7 @@ limitations under the License.
                 this._localMediaToCastMedia(items[i]));
             itemsToAdd[i].preloadTime = 20;
             if (this.localMedia.queueId && items[i].queueId === this.localMedia.queueId &&
-            this.currentTime !== 0) {
+                this.currentTime !== 0) {
               itemsToAdd[i].startTime = this.currentTime;
             }
           }
@@ -788,10 +835,10 @@ limitations under the License.
         }
       },
 
-      
+
       castQueueInsertAndPlayItem: function (media, insertBefore, autoplay) {
         var queueItem, request;
-        if(this.castMedia.queueInsertAndPlayItem){
+        if (this.castMedia.queueInsertAndPlayItem) {
 
           queueItem = new chrome.cast.media.QueueItem(this._localMediaToCastMedia(media));
           queueItem.autoplay = autoplay;
@@ -812,7 +859,7 @@ limitations under the License.
        */
       castQueueInsertItems: function (media, insertBefore, successCallback, autoplay) {
         var queueItem, request;
-        
+
         //Convert local media items to cast media items
         var itemsToAdd = [];
         for (var i = 0; i < media.length; i++) {
@@ -831,8 +878,8 @@ limitations under the License.
 
         //Insert the media
         this.castMedia.queueInsertItems(request, successCallback,
-              this._onGenericFailure.bind(this));
-        
+            this._onGenericFailure.bind(this));
+
       },
 
       castQueuePlayItem: function (itemId) {
