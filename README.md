@@ -14,23 +14,24 @@ limitations under the License.
 
 # cast-manager-polymer
 The `cast-manager` Polymer element is the controller for the other Cast Polymer elements.  It 
-exposes a number of properties which define the current state to bind to, handles events and 
+exposes a number of properties which define the current state, it also handles events and 
 routes them to the subscribed elements.
 
-The goal of `cast-manager` is to provide a simpler wrapper for the cast SDK.  It handles 
-all of Cast integration and state management for you and simplifies interaction down to a 
+The goal of `cast-manager` is to provide a simpler wrapper for the Cast SDK and local media 
+playback.  It handles all of Cast integration and state management for you and simplifies interaction down to a 
 few calls.
 
-[Here](http://googlecast.github.io/CastVideos-chrome-material/) is a demo of cast-manager being 
+[Here](http://googlecast.github.io/CastVideos-chrome-material/) is a demo of `cast-manager` being 
 used.
 
 `cast-manager` can be used with any other Polymer element.  Several are provided to use out of 
 the box:
 
 * [cast-video](https://github.com/googlecast/cast-video-polymer) - Handles displaying and 
-controlling the video
-* [cast-controller-bar](https://github.com/googlecast/cast-controller-bar-polymer) - Controls the
- Chromecast when the video controls aren't on screen.  Also displays the queue UI.
+controlling video
+* [cast-controller-bar](https://github.com/googlecast/cast-controller-bar-polymer) - Controller for
+ the
+ Chromecast when standard video controls aren't on screen.  Also displays the queue UI.
 * [cast-dialog](https://github.com/googlecast/cast-dialog-polymer) - Notifies users that the page
  is cast enabled.  Also handles the upcoming video notification and count down.
 
@@ -41,7 +42,7 @@ This section covers including the `cast-manager` element in your project
 
 ###Prerequisites
 
-*[Bower](http://bower.io/)
+* [Bower](http://bower.io/)
 
 ### Installation
 In your project directory install `cast-manager` using bower.  You may need to first `bower init`.
@@ -52,14 +53,14 @@ In your project directory install `cast-manager` using bower.  You may need to f
 This section covers adding the `cast-manager` element to your page 
 
 ### Include dependencies
-As part of head, we want to include the Polymer JS and `cast-manager`.
+As part of head, you want to include Polymer JS and `cast-manager`.
 
     <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
     
     <link rel="import" href="bower_components/cast-manager-polymer/cast-manager.html">
 
 ### Define elements    
-If you're defining this outside of a polymer element, you'll need to wrap `cast-manager` in an 
+If you're defining this outside of a Polymer element, you'll need to wrap `cast-manager` in an 
 auto binding template in the `<body>` to leverage property binding.
 
     <template id="t" is="dom-bind">
@@ -73,6 +74,16 @@ Add the `cast-manager` element as a child of the auto binding template
       </cast-manager>
     </template>
 
+### Get a reference to `cast-manager`
+If you've used an auto binding template you'll need to wait until the `cast-manager` element has 
+been added to the dom.  The auto binding template fires a `dom-change` event that you can listen 
+for.
+
+    var t = document.querySelector('#t');
+    t.addEventListener('dom-change', function () {
+      castManager = document.querySelector('cast-manager');
+    });
+      
 ### Define `app-id`
 The `app-id` is an attribute of `cast-manager`.  You need to specify the `app-id` of your 
 receiver app.  A demo receiver `app-id` is 4F8B3483. To create your own appId refer to the Cast 
@@ -110,7 +121,7 @@ found in `media-item.html`.
 
 #### Single Video 
 There are two ways to load a single video.  It's recommended to use the `cast-video` element for 
-playback since integration is simplistic.  
+playback since it simplifies integration to a few steps.
 
 ##### Method One: setLocalMedia
 Get a reference to the `cast-manager`
