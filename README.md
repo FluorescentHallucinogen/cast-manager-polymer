@@ -19,7 +19,7 @@ routes them to the subscribed elements.
 
 The goal of `cast-manager` is to provide a simpler wrapper for the Cast SDK and local media 
 playback.  It handles all of Cast integration and state management for you and simplifies interaction down to a 
-few calls.
+few calls.  Instead of integration taking weeks it can take a few minutes.
 
 [Here](http://googlecast.github.io/CastVideos-chrome-material/) is a demo of `cast-manager` being 
 used along with the [source](https://github.com/googlecast/CastVideos-chrome-material).
