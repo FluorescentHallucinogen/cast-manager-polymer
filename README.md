@@ -35,7 +35,9 @@ controlling video
 * [cast-dialog](https://github.com/googlecast/cast-dialog-polymer) - Notifies users that the page
  is cast enabled.  Also handles the upcoming video notification and count down.
 
-You can find an overview of how to create a Polymer element (here)[https://www.polymer-project.org/].
+You can find a codelab for using all of the elements together [here](http://www.code-labs.io/codelabs/polymer-cast-elements/index.html?index=..%2F..%2Fpolymer-summit&viewga=UA-39334307-12#0).
+
+You can find an overview of how to create a Polymer element [here](https://www.polymer-project.org/).
 
 ## Setup
 This section covers including the `cast-manager` element in your project
