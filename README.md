@@ -22,7 +22,7 @@ playback.  It handles all of Cast integration and state management for you and s
 few calls.
 
 [Here](http://googlecast.github.io/CastVideos-chrome-material/) is a demo of `cast-manager` being 
-used.
+used along with the [source](https://github.com/googlecast/CastVideos-chrome-material).
 
 `cast-manager` can be used with any other Polymer element.  Several are provided to use out of 
 the box:
