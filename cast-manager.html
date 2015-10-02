@@ -592,13 +592,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         this.set('localMedia', new cast.MediaItem(media));
 
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'loadMedia',
-              'thumbnailImageUrl': media.thumbnailImageUrl,
-              'url': media.url
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'loadMedia',
+            'thumbnailImageUrl': media.thumbnailImageUrl,
+            'url': media.url
           }
         });
 
@@ -659,12 +657,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         console.log('Toggle queue element');
 
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'toggleQueueElement',
-              "isQueueShown": this.isQueueShown
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'toggleQueueElement',
+            "isQueueShown": this.isQueueShown
           }
         });
       },
@@ -677,17 +673,13 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       playNow: function (media) {
         console.log('Play now: ' + media.url);
         // Send playNow Event to listening elements
-        this._fireIronEvent(
-            {
-              'detail': {
-                'name': 'media-action',
-                'data': {
-                  'action': 'playNow',
-                  'media': media
-                }
-              }
-            }
-        );
+        this._fireIronEvent({
+          'name': 'media-action',
+          'data': {
+            'action': 'playNow',
+            'media': media
+          }
+        });
 
         if (this.hasCastMedia) {
           //Get the id of the current index
@@ -728,12 +720,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       playNext: function (media) {
         console.log('Play next: ' + media.url);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'playNext',
-              'media': media
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'playNext',
+            'media': media
           }
         });
 
@@ -765,13 +755,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       queueMoveItemToNewIndex: function (itemId, newIndex) {
         console.log('Move item to new index id: ' + itemId + ' index: ' + newIndex);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'queueMoveItemToNewIndex',
-              'itemId': itemId,
-              'newIndex': newIndex
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'queueMoveItemToNewIndex',
+            'itemId': itemId,
+            'newIndex': newIndex
           }
         });
 
@@ -789,12 +777,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       queuePlayItem: function (media) {
         console.log('Playing queue item with id: ' + media.queueId);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'queuePlayItem',
-              'media': media
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'queuePlayItem',
+            'media': media
           }
         });
 
@@ -814,11 +800,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         console.log('Queue empty');
 
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'queueEmpty'
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'queueEmpty'
           }
         });
 
@@ -841,11 +825,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       queueToggleShuffle: function () {
         console.log('Toggling shuffle mode');
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'queueToggleShuffle'
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'queueToggleShuffle'
           }
         });
         this.queue.toggleShuffle();
@@ -863,11 +845,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         console.log('Toggling repeat mode');
 
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'queueToggleRepeatMode'
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'queueToggleRepeatMode'
           }
         });
         this.queue.toggleRepeatMode();
@@ -893,11 +873,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       fullscreen: function () {
         console.log('Fullscreen');
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'fullscreen'
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'fullscreen'
           }
         });
       },
@@ -907,11 +885,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
        */
       exitFullscreen: function () {
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'exitFullscreen'
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'exitFullscreen'
           }
         });
       },
@@ -923,12 +899,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
        */
       addItemsToQueue: function (items) {
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'addItemsToQueue',
-              'items': items
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'addItemsToQueue',
+            'items': items
           }
         });
 
@@ -954,12 +928,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       queueRemoveItem: function (media) {
         console.log('Removing item from queue: ', media.queueId);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'queueRemoveItem',
-              'media': media
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'queueRemoveItem',
+            'media': media
           }
         });
         if (this.hasCastMedia) {
@@ -1114,11 +1086,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
 
         // Fire an event to notify other elements that media has completed loading
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'mediaLoaded'
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'mediaLoaded'
           }
         });
       },
@@ -1150,13 +1120,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       seek: function (time, sender) {
         console.log('Seek: ' + time + ' ' + sender);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'seek',
-              'currentTime': time,
-              'sender': sender
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'seek',
+            'currentTime': time,
+            'sender': sender
           }
         });
 
@@ -1174,12 +1142,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       play: function (sender) {
         console.log('Play: ' + JSON.stringify(sender));
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'play',
-              'sender': sender
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'play',
+            'sender': sender
           }
         });
         // If the action is cast actionable, play the cast media
@@ -1201,12 +1167,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         console.log('Pause: ' + JSON.stringify(sender));
 
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'pause',
-              'sender': sender
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'pause',
+            'sender': sender
           }
         });
 
@@ -1226,13 +1190,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
 
         // Fire an event to notify elements of the volume change
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'volume',
-              'volume': volume,
-              'sender': sender
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'volume',
+            'volume': volume,
+            'sender': sender
           }
         });
         if (this.isCastActionable(sender)) {
@@ -1258,13 +1220,11 @@ Use the `helper-behavior` to easily add queueing and media control functionality
        */
       showPreloadDialog: function (media, time) {
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'preload',
-              'media': media,
-              'timeRemaining': timeRemaining
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'preload',
+            'media': media,
+            'timeRemaining': timeRemaining
           }
         });
       },
@@ -1275,11 +1235,9 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       hidePreloadDialog: function () {
         console.log('Hiding preload dialog');
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'hideDialog'
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'hideDialog'
           }
         });
       },
@@ -1292,12 +1250,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       setAutoPlayTrigger: function (trigger) {
         console.log('Setting auto play trigger to: ' + trigger);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'autoPlayTrigger',
-              'value': trigger
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'autoPlayTrigger',
+            'value': trigger
           }
         });
       },
@@ -1359,12 +1315,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       _hideSpinner: function () {
         this.set('showSpinner', false);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'spinner',
-              'show': false
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'spinner',
+            'show': false
           }
         });
       },
@@ -1375,12 +1329,10 @@ Use the `helper-behavior` to easily add queueing and media control functionality
       _showSpinner: function () {
         this.set('showSpinner', true);
         this._fireIronEvent({
-          'detail': {
-            'name': 'media-action',
-            'data': {
-              'action': 'spinner',
-              'show': true
-            }
+          'name': 'media-action',
+          'data': {
+            'action': 'spinner',
+            'show': true
           }
         })
       },
@@ -1523,8 +1475,7 @@ Use the `helper-behavior` to easily add queueing and media control functionality
        * @param {Object} event event details
        */
       _fireIronEvent: function (event) {
-        var ironEvent = new CustomEvent('iron-signal', event);
-        document.dispatchEvent(ironEvent);
+        this.fire('iron-signal', event);
       },
 
       /**
