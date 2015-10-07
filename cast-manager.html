@@ -504,7 +504,8 @@ Use the `helper-behavior` to easily add queueing and media control functionality
         // Set connection status to disconnected
         this.set('connectionStatus', cast.CastManager.CONNECTION_STATUS.DISCONNECTED);
         this.set('hasCastMedia', false);
-
+        this.set('session', null);
+        
         if (this._loadSavedQueueOnDisconnect && this._savedQueue !== null) {
           // Revert to previous queue
           this.set('queue', this._savedQueue);
