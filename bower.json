@@ -4,6 +4,7 @@
   "homepage": "https://github.com/pengying/cast-manager-polymer",
   "description": "cast-manager polymer element",
   "keywords": [
+    "web-components",
     "chromecast",
     "cast",
     "polymer"
